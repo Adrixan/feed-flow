@@ -164,7 +164,7 @@ compose {
                     iconFile.set(iconsRoot.resolve("icon.png"))
 
                     rpmLicenseType = "Apache-2.0"
-                    menuGroup = "Marco Gomiero"
+                    menuGroup = "Network;News"
                     appCategory = "News"
                 }
 
@@ -434,11 +434,20 @@ if (!isMacOS) {
                     FeedFlow RSS Reader
 
                     %post
-                    package_type=rpm
-                    xdg-desktop-menu install /opt/feedflow/lib/feedflow-FeedFlow.desktop
+                    install -d -m 755 /usr/share/applications
+                    install -m 644 /opt/feedflow/lib/feedflow-FeedFlow.desktop /usr/share/applications/feedflow-FeedFlow.desktop
+                    install -d -m 755 /usr/share/icons/hicolor/256x256/apps
+                    install -m 644 /opt/feedflow/lib/FeedFlow.png /usr/share/icons/hicolor/256x256/apps/feedflow-FeedFlow.png
+                    gtk-update-icon-cache -f -t /usr/share/icons/hicolor >/dev/null 2>&1 || true
+                    update-desktop-database /usr/share/applications >/dev/null 2>&1 || true
 
                     %preun
-                    xdg-desktop-menu uninstall /opt/feedflow/lib/feedflow-FeedFlow.desktop
+                    if [ "${d}1" = "0" ]; then
+                        rm -f /usr/share/applications/feedflow-FeedFlow.desktop
+                        rm -f /usr/share/icons/hicolor/256x256/apps/feedflow-FeedFlow.png
+                        gtk-update-icon-cache -f -t /usr/share/icons/hicolor >/dev/null 2>&1 || true
+                        update-desktop-database /usr/share/applications >/dev/null 2>&1 || true
+                    fi
 
                     %files
                     %defattr(-,root,root,-)
