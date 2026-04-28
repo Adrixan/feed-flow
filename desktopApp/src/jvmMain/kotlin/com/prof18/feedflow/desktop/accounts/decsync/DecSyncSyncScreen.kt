@@ -173,15 +173,47 @@ private fun ConnectedContent(
 }
 
 private suspend fun pickDirectory(): String? = withContext(Dispatchers.IO) {
+    tryNativeDirectoryPicker() ?: swingDirectoryPicker()
+}
+
+private fun tryNativeDirectoryPicker(): String? {
+    val home = System.getProperty("user.home")
+    val title = "Select DecSync Directory"
+    val kdialogCmd = listOf("kdialog", "--getexistingdirectory", home, "--title", title)
+    val zenityCmd = listOf("zenity", "--file-selection", "--directory", "--title=$title")
+    val desktop = System.getenv("XDG_CURRENT_DESKTOP")?.uppercase() ?: ""
+    val commands = if (desktop.contains("KDE")) {
+        listOf(kdialogCmd, zenityCmd)
+    } else {
+        listOf(zenityCmd, kdialogCmd)
+    }
+    for (cmd in commands) {
+        if (!isCommandAvailable(cmd.first())) continue
+        return try {
+            val process = ProcessBuilder(cmd)
+                .redirectErrorStream(true)
+                .start()
+            val output = process.inputStream.bufferedReader().readText().trim()
+            if (process.waitFor() == 0 && output.isNotEmpty()) output else null
+        } catch (_: Exception) {
+            null
+        }
+    }
+    return null
+}
+
+private fun isCommandAvailable(command: String): Boolean =
+    ProcessBuilder("which", command)
+        .redirectErrorStream(true)
+        .start()
+        .waitFor() == 0
+
+private fun swingDirectoryPicker(): String? {
     val chooser = JFileChooser().apply {
         fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
         dialogTitle = "Select DecSync Directory"
         isAcceptAllFileFilterUsed = false
     }
     val result = chooser.showOpenDialog(null)
-    if (result == JFileChooser.APPROVE_OPTION) {
-        chooser.selectedFile.absolutePath
-    } else {
-        null
-    }
+    return if (result == JFileChooser.APPROVE_OPTION) chooser.selectedFile.absolutePath else null
 }
