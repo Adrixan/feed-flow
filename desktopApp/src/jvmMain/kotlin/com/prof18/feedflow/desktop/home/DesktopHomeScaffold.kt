@@ -87,6 +87,7 @@ internal fun DesktopHomeScaffold(
     listState: LazyListState,
     snackbarHostState: SnackbarHostState,
     onSearchClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     onFeedSuggestionsClick: () -> Unit,
     currentReaderArticle: FeedItemUrlInfo?,
     onReaderClosed: () -> Unit,
@@ -222,6 +223,7 @@ internal fun DesktopHomeScaffold(
                             listState = listState,
                             snackbarHostState = snackbarHostState,
                             onSearchClick = onSearchClick,
+                            onSettingsClick = onSettingsClick,
                             showDrawerMenu = true,
                             isDrawerOpen = if (isThreePaneLayout) {
                                 isDockedDrawerVisible

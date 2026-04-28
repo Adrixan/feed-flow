@@ -58,7 +58,9 @@ class GReaderRepository internal constructor(
             SyncAccounts.GOOGLE_DRIVE,
             SyncAccounts.LOCAL,
             SyncAccounts.ICLOUD,
-            SyncAccounts.FEEDBIN, null,
+            SyncAccounts.FEEDBIN,
+            SyncAccounts.DECSYNC,
+            null,
             -> false
         }
     }

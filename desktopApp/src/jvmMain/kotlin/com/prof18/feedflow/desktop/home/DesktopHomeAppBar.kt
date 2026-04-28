@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -34,6 +35,7 @@ fun DesktopHomeAppBar(
     onClick: () -> Unit,
     onDoubleClick: () -> Unit,
     onSearchClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     TopAppBar(
@@ -71,6 +73,12 @@ fun DesktopHomeAppBar(
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = LocalFeedFlowStrings.current.searchButtonContentDescription,
+                )
+            }
+            IconButton(onClick = onSettingsClick) {
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = LocalFeedFlowStrings.current.settingsTitle,
                 )
             }
         },

@@ -50,6 +50,7 @@ internal fun HomeScreen(
     snackbarHostState: SnackbarHostState,
     onImportExportClick: () -> Unit,
     onSearchClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     onAccountsClick: () -> Unit,
     navigateToReaderMode: (FeedItemUrlInfo) -> Unit,
     onAddFeedClick: () -> Unit,
@@ -266,6 +267,7 @@ internal fun HomeScreen(
         DesktopHomeScaffold(
             listState = listState,
             onSearchClick = onSearchClick,
+            onSettingsClick = onSettingsClick,
             displayState = homeDisplayState,
             feedListActions = feedListActions,
             feedManagementActions = feedManagementActions,
@@ -282,6 +284,7 @@ internal fun HomeScreen(
         DesktopSinglePaneHomeScaffold(
             listState = listState,
             onSearchClick = onSearchClick,
+            onSettingsClick = onSettingsClick,
             displayState = homeDisplayState,
             feedListActions = feedListActions,
             feedManagementActions = feedManagementActions,

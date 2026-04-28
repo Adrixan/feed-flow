@@ -364,6 +364,10 @@ private fun FrameWindowScope.MainWindowContent(
                                 homeViewModel = homeViewModel,
                                 snackbarHostState = snackbarHostState,
                                 dialogWindowNavigator = dialogWindowNavigator,
+                                onSettingsRequested = {
+                                    initialSettingsCategory = DesktopSettingsCategory.GENERAL
+                                    dialogWindowNavigator.open(DesktopDialogWindowDestination.Settings)
+                                },
                                 onAccountsRequested = {
                                     initialSettingsCategory = DesktopSettingsCategory.ACCOUNTS
                                     dialogWindowNavigator.open(DesktopDialogWindowDestination.Settings)
@@ -491,6 +495,7 @@ private fun EntryProviderScope<NavKey>.screens(
     homeViewModel: HomeViewModel,
     snackbarHostState: SnackbarHostState,
     dialogWindowNavigator: DesktopDialogWindowNavigator,
+    onSettingsRequested: () -> Unit,
     onAccountsRequested: () -> Unit,
     onEditFeedRequested: (FeedSource) -> Unit,
 ) {
@@ -502,6 +507,7 @@ private fun EntryProviderScope<NavKey>.screens(
                 dialogWindowNavigator.open(DesktopDialogWindowDestination.ImportExport)
             },
             onSearchClick = { backStack.add(Search) },
+            onSettingsClick = onSettingsRequested,
             onAccountsClick = onAccountsRequested,
             navigateToReaderMode = { feedItemUrlInfo ->
                 backStack.add(feedItemUrlInfo.toReaderMode())

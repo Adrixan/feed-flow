@@ -56,6 +56,7 @@ fun DesktopHomeScreenContent(
     snackbarHostState: SnackbarHostState,
     onSearchClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onSettingsClick: () -> Unit = {},
     showDrawerMenu: Boolean = true,
     isDrawerOpen: Boolean = false,
     onDrawerMenuClick: () -> Unit = {},
@@ -81,6 +82,7 @@ fun DesktopHomeScreenContent(
                 isDrawerOpen = isDrawerOpen,
                 onDrawerMenuClick = onDrawerMenuClick,
                 onSearchClick = onSearchClick,
+                onSettingsClick = onSettingsClick,
                 onClick = {
                     scope.launch {
                         listState.scrollToItemConditionally(0, reduceMotionEnabled = reduceMotionEnabled)
