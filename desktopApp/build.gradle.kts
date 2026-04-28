@@ -353,3 +353,154 @@ tasks.withType(KotlinCompile::class.java) {
         )
     }
 }
+
+// On Linux, the jpackage native launcher (libapplauncher.so) crashes with
+// __cxa_pure_virtual during process exit on some systems (known jpackage bug).
+// Fix: after packageRpm/packageDeb is built, post-process the RPM to replace
+// the native launcher binary with a shell script that invokes the JVM directly.
+if (!isMacOS) {
+    // Resolve at configuration time (serializable values for configuration cache)
+    val launcherVersion = appVersionName()
+    val rpmOutDir = layout.buildDirectory.asFile.get().resolve("release/main/rpm")
+    val gradleJavaHome = System.getProperty("java.home")
+
+    tasks.matching { it.name == "packageRpm" }.configureEach {
+        doLast {
+            val rpmFile = rpmOutDir.listFiles()?.firstOrNull { it.name.endsWith(".rpm") }
+                ?: return@doLast
+
+            val workDir = File(System.getProperty("java.io.tmpdir"), "feedflow-rpm-patch-${System.currentTimeMillis()}").also { it.mkdirs() }
+            try {
+                val extractDir = workDir.resolve("extract").also { it.mkdirs() }
+                val topDir = workDir.resolve("rpmbuild").also { it.mkdirs() }
+                listOf("SPECS", "RPMS", "BUILD", "SOURCES", "SRPMS").forEach {
+                    topDir.resolve(it).mkdirs()
+                }
+
+                // Extract RPM payload
+                val extractCmd = "rpm2cpio '${rpmFile.absolutePath}' | cpio -idm"
+                val extractProc = ProcessBuilder("sh", "-c", extractCmd)
+                    .directory(extractDir)
+                    .redirectErrorStream(true)
+                    .start()
+                if (extractProc.waitFor() != 0) {
+                    throw GradleException("rpm2cpio extraction failed: ${extractProc.inputStream.bufferedReader().readText()}")
+                }
+
+                // Patch launcher: add java binary to the jlink runtime
+                val runtimeBinDir = extractDir.resolve("opt/feedflow/lib/runtime/bin")
+                runtimeBinDir.mkdirs()
+                val gradleJava = File(gradleJavaHome).resolve("bin/java")
+                if (gradleJava.exists()) {
+                    gradleJava.copyTo(runtimeBinDir.resolve("java"), overwrite = true)
+                    runtimeBinDir.resolve("java").setExecutable(true)
+                }
+
+                // Replace ELF native launcher with a shell script
+                val launcherFile = extractDir.resolve("opt/feedflow/bin/FeedFlow")
+                launcherFile.delete()
+                val d = "\$"
+                launcherFile.writeText(
+                    """
+                    #!/bin/sh
+                    SCRIPT="${d}(readlink -f "${d}0")"
+                    INSTALL_DIR="${d}(dirname "${d}(dirname "${d}SCRIPT")")"
+                    APP_DIR="${d}INSTALL_DIR/lib/app"
+                    JAVA="${d}INSTALL_DIR/lib/runtime/bin/java"
+                    exec "${d}JAVA" \
+                        "-Djpackage.app-version=$launcherVersion" \
+                        "-Dcompose.application.resources.dir=${d}APP_DIR/resources" \
+                        "-Dcompose.application.configure.swing.globals=true" \
+                        "-Dskiko.library.path=${d}APP_DIR" \
+                        -cp "${d}APP_DIR/*" \
+                        com.prof18.feedflow.desktop.MainKt "${d}@"
+                    """.trimIndent(),
+                )
+                launcherFile.setExecutable(true)
+
+                // Build a new RPM from the patched file tree
+                val specFile = topDir.resolve("SPECS/feedflow.spec")
+                specFile.writeText(
+                    """
+                    %define _topdir ${topDir.absolutePath}
+                    Name: feedflow
+                    Version: $launcherVersion
+                    Release: 1
+                    Summary: FeedFlow RSS Reader
+                    License: Apache-2.0
+                    BuildArch: x86_64
+
+                    %description
+                    FeedFlow RSS Reader
+
+                    %post
+                    package_type=rpm
+                    xdg-desktop-menu install /opt/feedflow/lib/feedflow-FeedFlow.desktop
+
+                    %preun
+                    xdg-desktop-menu uninstall /opt/feedflow/lib/feedflow-FeedFlow.desktop
+
+                    %files
+                    %defattr(-,root,root,-)
+                    /opt/feedflow
+                    """.trimIndent(),
+                )
+
+                val buildProc = ProcessBuilder(
+                    "rpmbuild", "-bb",
+                    "--buildroot", extractDir.absolutePath,
+                    "--define", "_topdir ${topDir.absolutePath}",
+                    specFile.absolutePath,
+                ).redirectErrorStream(true).start()
+                val buildOut = buildProc.inputStream.bufferedReader().readText()
+                if (buildProc.waitFor() != 0) {
+                    throw GradleException("rpmbuild patching failed:\n$buildOut")
+                }
+
+                // Replace original RPM with the patched one
+                val patchedRpm = topDir.resolve("RPMS/x86_64").listFiles()
+                    ?.firstOrNull { it.name.endsWith(".rpm") }
+                    ?: throw GradleException("rpmbuild produced no RPM in RPMS/x86_64")
+                patchedRpm.copyTo(rpmFile, overwrite = true)
+                println("Linux launcher patched: ${rpmFile.name}")
+            } finally {
+                workDir.deleteRecursively()
+            }
+        }
+    }
+
+    // Also patch createDistributable output so that running the app directly works
+    tasks.matching { it.name == "createDistributable" }.configureEach {
+        doLast {
+            val appImageDir = layout.buildDirectory.asFile.get().resolve("release/main/app/FeedFlow")
+            if (!appImageDir.exists()) return@doLast
+            val runtimeBinDir = appImageDir.resolve("lib/runtime/bin")
+            runtimeBinDir.mkdirs()
+            val gradleJava = File(gradleJavaHome).resolve("bin/java")
+            if (gradleJava.exists()) {
+                gradleJava.copyTo(runtimeBinDir.resolve("java"), overwrite = true)
+                runtimeBinDir.resolve("java").setExecutable(true)
+            }
+            val launcherFile = appImageDir.resolve("bin/FeedFlow")
+            launcherFile.delete()
+            val d = "\$"
+            launcherFile.writeText(
+                """
+                #!/bin/sh
+                SCRIPT="${d}(readlink -f "${d}0")"
+                INSTALL_DIR="${d}(dirname "${d}(dirname "${d}SCRIPT")")"
+                APP_DIR="${d}INSTALL_DIR/lib/app"
+                JAVA="${d}INSTALL_DIR/lib/runtime/bin/java"
+                exec "${d}JAVA" \
+                    "-Djpackage.app-version=$launcherVersion" \
+                    "-Dcompose.application.resources.dir=${d}APP_DIR/resources" \
+                    "-Dcompose.application.configure.swing.globals=true" \
+                    "-Dskiko.library.path=${d}APP_DIR" \
+                    -cp "${d}APP_DIR/*" \
+                    com.prof18.feedflow.desktop.MainKt "${d}@"
+                """.trimIndent(),
+            )
+            launcherFile.setExecutable(true)
+        }
+    }
+}
