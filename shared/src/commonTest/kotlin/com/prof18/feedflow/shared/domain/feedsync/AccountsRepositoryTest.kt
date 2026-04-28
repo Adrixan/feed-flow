@@ -143,6 +143,7 @@ class AccountsRepositoryTest : KoinTestBase() {
             SyncAccounts.MINIFLUX,
             SyncAccounts.FEEDBIN,
             SyncAccounts.BAZQUX,
+            SyncAccounts.DECSYNC,
         )
 
         val validAccounts = accountsRepository.getValidAccounts()

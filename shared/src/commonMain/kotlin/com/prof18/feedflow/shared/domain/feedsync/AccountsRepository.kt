@@ -93,6 +93,7 @@ internal class AccountsRepository(
         add(SyncAccounts.MINIFLUX)
         add(SyncAccounts.FEEDBIN)
         add(SyncAccounts.BAZQUX)
+        add(SyncAccounts.DECSYNC)
     }
 
     private fun MutableList<SyncAccounts>.generateAndroidAccounts() {

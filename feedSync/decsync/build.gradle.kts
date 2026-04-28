@@ -27,5 +27,14 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
             }
         }
+
+        jvmMain {
+            dependencies {
+                // libdecsync has no JVM artifact; bundle the extracted Android runtime JAR
+                // which is pure JVM bytecode for the File-based constructor path
+                implementation(files("libs/libdecsync-jvm.jar"))
+                implementation(libs.kotlinx.serialization.json)
+            }
+        }
     }
 }
