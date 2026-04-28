@@ -1,5 +1,6 @@
 package com.prof18.feedflow.shared.test
 
+import com.prof18.feedflow.core.model.SyncResult
 import com.prof18.feedflow.feedsync.decsync.DecSyncItemsSyncActions
 
 class FakeDecSyncItemsSyncActions : DecSyncItemsSyncActions {
@@ -23,6 +24,8 @@ class FakeDecSyncItemsSyncActions : DecSyncItemsSyncActions {
     override fun disconnect() {
         setupState = false
     }
+
+    override suspend fun syncFeedSources(): SyncResult = SyncResult.Success
 
     override suspend fun markItemRead(itemId: String, isRead: Boolean) {
         markedReadItems.add(itemId to isRead)

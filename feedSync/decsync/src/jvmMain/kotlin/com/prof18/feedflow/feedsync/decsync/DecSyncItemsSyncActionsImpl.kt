@@ -1,5 +1,7 @@
 package com.prof18.feedflow.feedsync.decsync
 
+import com.prof18.feedflow.core.model.SyncResult
+
 internal class DecSyncItemsSyncActionsImpl(
     private val decSyncRepository: DecSyncRepository,
 ) : DecSyncItemsSyncActions {
@@ -10,6 +12,7 @@ internal class DecSyncItemsSyncActionsImpl(
     override fun setup(dirPath: String): Result<Unit> = decSyncRepository.setup(dirPath)
     override fun isSetup(): Boolean = decSyncRepository.isDecSyncSetup()
     override fun disconnect() = decSyncRepository.disconnect()
+    override suspend fun syncFeedSources(): SyncResult = decSyncRepository.syncFeedSources()
     override suspend fun markItemRead(itemId: String, isRead: Boolean) {
         decSyncRepository.markItemRead(itemId, isRead)
     }

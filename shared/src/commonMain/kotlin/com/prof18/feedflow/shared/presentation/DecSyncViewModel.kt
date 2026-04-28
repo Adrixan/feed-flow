@@ -45,6 +45,7 @@ class DecSyncViewModel internal constructor(
             decSyncActions.setup(dirPath).fold(
                 onSuccess = {
                     accountsRepository.setDecSyncAccount()
+                    decSyncActions.syncFeedSources()
                     feedStateRepository.getFeeds()
                     connectionSuccessChannel.trySend(Unit)
                     uiMutableState.update { AccountConnectionUiState.Linked(syncState = AccountSyncUIState.None) }

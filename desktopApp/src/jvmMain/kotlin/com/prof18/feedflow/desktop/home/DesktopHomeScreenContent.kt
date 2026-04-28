@@ -82,6 +82,7 @@ fun DesktopHomeScreenContent(
                 isDrawerOpen = isDrawerOpen,
                 onDrawerMenuClick = onDrawerMenuClick,
                 onSearchClick = onSearchClick,
+                onRefreshClick = feedListActions.refreshData,
                 onSettingsClick = onSettingsClick,
                 onClick = {
                     scope.launch {

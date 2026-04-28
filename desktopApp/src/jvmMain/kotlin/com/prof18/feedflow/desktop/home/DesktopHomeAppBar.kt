@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
@@ -35,6 +36,7 @@ fun DesktopHomeAppBar(
     onClick: () -> Unit,
     onDoubleClick: () -> Unit,
     onSearchClick: () -> Unit,
+    onRefreshClick: () -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -69,6 +71,12 @@ fun DesktopHomeAppBar(
             }
         },
         actions = {
+            IconButton(onClick = onRefreshClick) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = LocalFeedFlowStrings.current.refreshFeeds,
+                )
+            }
             IconButton(onClick = onSearchClick) {
                 Icon(
                     imageVector = Icons.Default.Search,

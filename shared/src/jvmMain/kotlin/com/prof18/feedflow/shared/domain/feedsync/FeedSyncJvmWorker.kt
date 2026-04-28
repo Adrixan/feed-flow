@@ -12,6 +12,7 @@ import com.prof18.feedflow.core.utils.DispatcherProvider
 import com.prof18.feedflow.core.utils.FeedSyncMessageQueue
 import com.prof18.feedflow.feedsync.database.data.SyncedDatabaseHelper.Companion.SYNC_DATABASE_NAME_DEBUG
 import com.prof18.feedflow.feedsync.database.data.SyncedDatabaseHelper.Companion.SYNC_DATABASE_NAME_PROD
+import com.prof18.feedflow.feedsync.decsync.DecSyncRepository
 import com.prof18.feedflow.feedsync.dropbox.DropboxDataSource
 import com.prof18.feedflow.feedsync.dropbox.DropboxDownloadParam
 import com.prof18.feedflow.feedsync.dropbox.DropboxSettings
@@ -50,6 +51,7 @@ internal class FeedSyncJvmWorker(
     private val googleDriveSettings: GoogleDriveSettings,
     private val accountsRepository: AccountsRepository,
     private val iCloudSettings: ICloudSettings,
+    private val decSyncRepository: DecSyncRepository,
 ) : FeedSyncWorker {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -267,6 +269,9 @@ internal class FeedSyncJvmWorker(
     }
 
     override suspend fun syncFeedSources(): SyncResult = withContext(dispatcherProvider.io) {
+        if (accountsRepository.getCurrentSyncAccount() == SyncAccounts.DECSYNC) {
+            return@withContext decSyncRepository.syncFeedSources()
+        }
         mutex.withLock {
             try {
                 feedSyncer.syncFeedSourceCategory()
@@ -280,6 +285,9 @@ internal class FeedSyncJvmWorker(
     }
 
     override suspend fun syncFeedItems(): SyncResult = withContext(dispatcherProvider.io) {
+        if (accountsRepository.getCurrentSyncAccount() == SyncAccounts.DECSYNC) {
+            return@withContext decSyncRepository.syncFeedItems()
+        }
         mutex.withLock {
             try {
                 feedSyncer.syncFeedItem()

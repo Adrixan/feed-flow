@@ -185,6 +185,7 @@ internal actual fun getPlatformModule(appEnvironment: AppEnvironment): Module = 
             googleDriveSettings = get(),
             accountsRepository = get(),
             iCloudSettings = get(),
+            decSyncRepository = get(),
         )
     }
 
