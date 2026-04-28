@@ -56,6 +56,7 @@ class AccountsRepositoryTest : KoinTestBase() {
                 gReaderRepository = get(),
                 networkSettings = get(),
                 feedbinRepository = get(),
+                decSyncSettings = get(),
             )
         }
     }
@@ -71,6 +72,7 @@ class AccountsRepositoryTest : KoinTestBase() {
             SyncAccounts.MINIFLUX,
             SyncAccounts.FEEDBIN,
             SyncAccounts.BAZQUX,
+            SyncAccounts.DECSYNC,
         )
 
         val validAccounts = accountsRepository.getValidAccounts()

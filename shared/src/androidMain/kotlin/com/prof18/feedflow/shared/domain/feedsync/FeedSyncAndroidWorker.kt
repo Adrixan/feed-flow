@@ -19,6 +19,7 @@ import com.prof18.feedflow.core.utils.DispatcherProvider
 import com.prof18.feedflow.core.utils.FeedSyncMessageQueue
 import com.prof18.feedflow.feedsync.database.data.SyncedDatabaseHelper.Companion.SYNC_DATABASE_NAME_DEBUG
 import com.prof18.feedflow.feedsync.database.data.SyncedDatabaseHelper.Companion.SYNC_DATABASE_NAME_PROD
+import com.prof18.feedflow.feedsync.decsync.DecSyncRepository
 import com.prof18.feedflow.feedsync.dropbox.DropboxDataSource
 import com.prof18.feedflow.feedsync.dropbox.DropboxDownloadParam
 import com.prof18.feedflow.feedsync.dropbox.DropboxSettings
@@ -51,6 +52,7 @@ internal class FeedSyncAndroidWorker(
     private val googleDriveSettings: GoogleDriveSettings,
     private val settingsRepository: SettingsRepository,
     private val accountsRepository: AccountsRepository,
+    private val decSyncRepository: DecSyncRepository,
 ) : FeedSyncWorker {
 
     private val mutex = Mutex()
@@ -128,6 +130,7 @@ internal class FeedSyncAndroidWorker(
             SyncAccounts.MINIFLUX,
             SyncAccounts.BAZQUX,
             SyncAccounts.FEEDBIN,
+            SyncAccounts.DECSYNC,
             -> {
                 // Do nothing
             }
@@ -182,6 +185,7 @@ internal class FeedSyncAndroidWorker(
             SyncAccounts.MINIFLUX,
             SyncAccounts.BAZQUX,
             SyncAccounts.FEEDBIN,
+            SyncAccounts.DECSYNC,
             -> {
                 SyncResult.Success
             }
@@ -189,6 +193,9 @@ internal class FeedSyncAndroidWorker(
     }
 
     override suspend fun syncFeedSources(): SyncResult = withContext(dispatcherProvider.io) {
+        if (accountsRepository.getCurrentSyncAccount() == SyncAccounts.DECSYNC) {
+            return@withContext decSyncRepository.syncFeedSources()
+        }
         mutex.withLock {
             try {
                 feedSyncer.syncFeedSourceCategory()
@@ -202,6 +209,9 @@ internal class FeedSyncAndroidWorker(
     }
 
     override suspend fun syncFeedItems(): SyncResult = withContext(dispatcherProvider.io) {
+        if (accountsRepository.getCurrentSyncAccount() == SyncAccounts.DECSYNC) {
+            return@withContext decSyncRepository.syncFeedItems()
+        }
         mutex.withLock {
             try {
                 feedSyncer.syncFeedItem()

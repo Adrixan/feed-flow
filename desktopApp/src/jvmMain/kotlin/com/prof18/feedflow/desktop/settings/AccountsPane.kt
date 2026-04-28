@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import com.prof18.feedflow.core.model.SyncAccounts
 import com.prof18.feedflow.desktop.accounts.AccountsScreen
 import com.prof18.feedflow.desktop.accounts.bazqux.BazquxSyncScreen
+import com.prof18.feedflow.desktop.accounts.decsync.DecSyncSyncScreen
 import com.prof18.feedflow.desktop.accounts.dropbox.DropboxSyncScreen
 import com.prof18.feedflow.desktop.accounts.feedbin.FeedbinSyncScreen
 import com.prof18.feedflow.desktop.accounts.freshrss.FreshRssSyncScreen
@@ -33,6 +34,7 @@ internal fun AccountsPane() {
                 navigateToMinifluxSync = { selectedAccount = SyncAccounts.MINIFLUX },
                 navigateToBazquxSync = { selectedAccount = SyncAccounts.BAZQUX },
                 navigateToFeedbinSync = { selectedAccount = SyncAccounts.FEEDBIN },
+                navigateToDecSyncSync = { selectedAccount = SyncAccounts.DECSYNC },
             )
 
             SyncAccounts.DROPBOX -> DropboxSyncScreen(
@@ -66,6 +68,11 @@ internal fun AccountsPane() {
             )
 
             SyncAccounts.FEEDBIN -> FeedbinSyncScreen(
+                navigateBack = { selectedAccount = null },
+                showNavigateBack = true,
+            )
+
+            SyncAccounts.DECSYNC -> DecSyncSyncScreen(
                 navigateBack = { selectedAccount = null },
                 showNavigateBack = true,
             )

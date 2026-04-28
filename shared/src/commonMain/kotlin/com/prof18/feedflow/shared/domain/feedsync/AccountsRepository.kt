@@ -2,6 +2,7 @@ package com.prof18.feedflow.shared.domain.feedsync
 
 import com.prof18.feedflow.core.model.SyncAccounts
 import com.prof18.feedflow.core.utils.AppConfig
+import com.prof18.feedflow.feedsync.decsync.DecSyncSettings
 import com.prof18.feedflow.feedsync.dropbox.DropboxSettings
 import com.prof18.feedflow.feedsync.feedbin.domain.FeedbinRepository
 import com.prof18.feedflow.feedsync.googledrive.GoogleDriveSettings
@@ -22,6 +23,7 @@ internal class AccountsRepository(
     private val gReaderRepository: GReaderRepository,
     private val networkSettings: NetworkSettings,
     private val feedbinRepository: FeedbinRepository,
+    private val decSyncSettings: DecSyncSettings,
 ) {
     private val currentAccountMutableState = MutableStateFlow(SyncAccounts.LOCAL)
     val currentAccountState = currentAccountMutableState.asStateFlow()
@@ -104,6 +106,7 @@ internal class AccountsRepository(
         add(SyncAccounts.MINIFLUX)
         add(SyncAccounts.FEEDBIN)
         add(SyncAccounts.BAZQUX)
+        add(SyncAccounts.DECSYNC)
     }
 
     private fun MutableList<SyncAccounts>.generateIOSAccounts() {
@@ -165,6 +168,11 @@ internal class AccountsRepository(
         currentAccountMutableState.value = SyncAccounts.BAZQUX
     }
 
+    fun setDecSyncAccount() {
+        clearOtherSyncCredentials(except = SyncAccounts.DECSYNC)
+        currentAccountMutableState.value = SyncAccounts.DECSYNC
+    }
+
     fun clearAccount() {
         currentAccountMutableState.value = SyncAccounts.LOCAL
     }
@@ -185,6 +193,9 @@ internal class AccountsRepository(
             except != SyncAccounts.FEEDBIN
         ) {
             networkSettings.deleteAll()
+        }
+        if (except != SyncAccounts.DECSYNC) {
+            decSyncSettings.clearAll()
         }
     }
 
@@ -207,6 +218,9 @@ internal class AccountsRepository(
         }
         if (feedbinRepository.isAccountSet()) {
             return SyncAccounts.FEEDBIN
+        }
+        if (decSyncSettings.getDirPath() != null) {
+            return SyncAccounts.DECSYNC
         }
         return SyncAccounts.LOCAL
     }

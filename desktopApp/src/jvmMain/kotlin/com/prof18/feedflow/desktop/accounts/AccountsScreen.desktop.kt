@@ -21,6 +21,7 @@ internal fun AccountsScreen(
     navigateToMinifluxSync: () -> Unit,
     navigateToBazquxSync: () -> Unit,
     navigateToFeedbinSync: () -> Unit,
+    navigateToDecSyncSync: () -> Unit,
 ) {
     val viewModel = koinViewModel<AccountsViewModel>()
     val accountSync by viewModel.accountsState.collectAsState()
@@ -37,5 +38,6 @@ internal fun AccountsScreen(
         onMinifluxClick = navigateToMinifluxSync,
         onBazquxClick = navigateToBazquxSync,
         onFeedbinClick = navigateToFeedbinSync,
+        onDecSyncClick = navigateToDecSyncSync,
     )
 }

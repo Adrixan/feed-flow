@@ -160,6 +160,7 @@ internal actual fun getPlatformModule(appEnvironment: AppEnvironment): Module = 
             googleDriveSettings = get(),
             settingsRepository = get(),
             accountsRepository = get(),
+            decSyncRepository = get(),
         )
     } bind FeedSyncWorker::class
 

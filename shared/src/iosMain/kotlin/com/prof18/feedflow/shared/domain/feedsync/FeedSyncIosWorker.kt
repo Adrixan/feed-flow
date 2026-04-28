@@ -262,6 +262,7 @@ internal class FeedSyncIosWorker(
             SyncAccounts.MINIFLUX,
             SyncAccounts.BAZQUX,
             SyncAccounts.FEEDBIN,
+            SyncAccounts.DECSYNC,
             -> {
                 // Do nothing
             }
@@ -302,6 +303,7 @@ internal class FeedSyncIosWorker(
             SyncAccounts.MINIFLUX,
             SyncAccounts.BAZQUX,
             SyncAccounts.FEEDBIN,
+            SyncAccounts.DECSYNC,
             -> {
                 // Do nothing
                 SyncResult.Success

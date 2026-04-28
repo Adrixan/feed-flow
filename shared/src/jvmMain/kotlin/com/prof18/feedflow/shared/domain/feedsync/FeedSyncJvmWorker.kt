@@ -161,6 +161,7 @@ internal class FeedSyncJvmWorker(
             SyncAccounts.MINIFLUX,
             SyncAccounts.BAZQUX,
             SyncAccounts.FEEDBIN,
+            SyncAccounts.DECSYNC,
             -> true
         }
 
@@ -257,6 +258,7 @@ internal class FeedSyncJvmWorker(
             SyncAccounts.MINIFLUX,
             SyncAccounts.BAZQUX,
             SyncAccounts.FEEDBIN,
+            SyncAccounts.DECSYNC,
             -> {
                 logger.d { "current sync account does not require cloud download" }
                 SyncResult.Success
@@ -344,5 +346,6 @@ internal fun syncDownloadErrorForAccount(account: SyncAccounts): SyncDownloadErr
         SyncAccounts.MINIFLUX,
         SyncAccounts.BAZQUX,
         SyncAccounts.FEEDBIN,
+        SyncAccounts.DECSYNC,
         -> SyncDownloadError.DropboxDownloadFailed
     }

@@ -46,6 +46,7 @@ fun AccountsContent(
     onMinifluxClick: () -> Unit,
     onBazquxClick: () -> Unit,
     onFeedbinClick: () -> Unit,
+    onDecSyncClick: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
     selectedAccount: SyncAccounts? = null,
@@ -76,6 +77,7 @@ fun AccountsContent(
                     SyncAccounts.MINIFLUX -> onMinifluxClick
                     SyncAccounts.BAZQUX -> onBazquxClick
                     SyncAccounts.FEEDBIN -> onFeedbinClick
+                    SyncAccounts.DECSYNC -> onDecSyncClick
                 }
                 Row(
                     modifier = Modifier
@@ -122,6 +124,7 @@ private fun SyncAccounts.getTitle() =
         SyncAccounts.MINIFLUX -> "Miniflux"
         SyncAccounts.BAZQUX -> "BazQux"
         SyncAccounts.FEEDBIN -> "Feedbin"
+        SyncAccounts.DECSYNC -> "DecSync"
     }
 
 private fun SyncAccounts.getIcon() =
@@ -134,6 +137,7 @@ private fun SyncAccounts.getIcon() =
         SyncAccounts.MINIFLUX -> Miniflux
         SyncAccounts.BAZQUX -> Bazqux
         SyncAccounts.FEEDBIN -> Feedbin
+        SyncAccounts.DECSYNC -> Cloud
     }
 
 @Composable

@@ -19,6 +19,7 @@ import com.prof18.feedflow.core.model.onErrorSuspend
 import com.prof18.feedflow.core.utils.DispatcherProvider
 import com.prof18.feedflow.database.DatabaseHelper
 import com.prof18.feedflow.feedsync.database.domain.toFeedSource
+import com.prof18.feedflow.feedsync.decsync.DecSyncItemsSyncActions
 import com.prof18.feedflow.feedsync.feedbin.domain.FeedbinRepository
 import com.prof18.feedflow.feedsync.greader.domain.GReaderRepository
 import com.prof18.feedflow.shared.domain.feedsync.AccountsRepository
@@ -49,6 +50,7 @@ internal class FeedSourcesRepository(
     private val rssParserWrapper: RssParserWrapper,
     private val dateFormatter: DateFormatter,
     private val rssChannelMapper: RssChannelMapper,
+    private val decSyncItemsSyncActions: DecSyncItemsSyncActions,
 ) {
     private val knownUrlSuffix = listOf(
         "",
@@ -105,6 +107,16 @@ internal class FeedSourcesRepository(
                 feedSyncRepository.deleteFeedSource(feedSource)
                 feedSyncRepository.performBackup()
             }
+
+            SyncAccounts.DECSYNC -> {
+                try {
+                    databaseHelper.deleteFeedSource(feedSource.id)
+                    decSyncItemsSyncActions.removeSubscription(feedSource.url)
+                } catch (e: Exception) {
+                    logger.e(e) { "Error while deleting feed source via DecSync" }
+                    feedStateRepository.emitErrorState(DeleteFeedSourceError())
+                }
+            }
         }
     }
 
@@ -146,6 +158,15 @@ internal class FeedSourcesRepository(
                 databaseHelper.updateFeedSourceName(feedSourceId, newName)
                 feedSyncRepository.updateFeedSourceName(feedSourceId, newName)
                 feedSyncRepository.performBackup()
+            }
+
+            SyncAccounts.DECSYNC -> {
+                databaseHelper.updateFeedSourceName(feedSourceId, newName)
+                val feedSource = databaseHelper.getFeedSource(feedSourceId)
+                if (feedSource != null) {
+                    decSyncItemsSyncActions.addSubscription(feedSource.url, newName, feedSource.category?.title)
+                }
+                Unit
             }
         }
 
@@ -191,6 +212,12 @@ internal class FeedSourcesRepository(
                 categoryName,
                 isNotificationEnabled,
             )
+
+            SyncAccounts.DECSYNC -> addFeedSourceForDecSync(
+                sanitizeUrl(feedUrl),
+                categoryName,
+                isNotificationEnabled,
+            )
         }
 
     suspend fun editFeedSource(
@@ -216,6 +243,7 @@ internal class FeedSourcesRepository(
             SyncAccounts.GOOGLE_DRIVE,
             SyncAccounts.ICLOUD,
             -> editFeedSourceForLocalAccount(newFeedSource, originalFeedSource)
+            SyncAccounts.DECSYNC -> editFeedSourceForLocalAccount(newFeedSource, originalFeedSource)
         }
     }
 
@@ -240,6 +268,28 @@ internal class FeedSourcesRepository(
             AddFeedResponse.NotRssFeed -> {
                 FeedAddedState.Error.InvalidUrl
             }
+        }
+    }
+
+    private suspend fun addFeedSourceForDecSync(
+        feedUrl: String,
+        categoryName: FeedSourceCategory?,
+        isNotificationEnabled: Boolean,
+    ): FeedAddedState {
+        return when (val feedResponse = fetchSingleFeed(feedUrl, categoryName)) {
+            is AddFeedResponse.FeedFound -> {
+                addFeedSource(feedResponse, isNotificationEnabled)
+                decSyncItemsSyncActions.addSubscription(
+                    url = feedResponse.parsedFeedSource.url,
+                    title = feedResponse.parsedFeedSource.title,
+                    categoryName = feedResponse.parsedFeedSource.category?.title,
+                )
+                FeedAddedState.FeedAdded(feedResponse.parsedFeedSource.title)
+            }
+
+            AddFeedResponse.EmptyFeed -> FeedAddedState.Error.InvalidTitleLink
+
+            AddFeedResponse.NotRssFeed -> FeedAddedState.Error.InvalidUrl
         }
     }
 
@@ -562,6 +612,24 @@ internal class FeedSourcesRepository(
                     category?.let { listOf(it) } ?: emptyList(),
                 )
                 feedSyncRepository.performBackup()
+            }
+
+            SyncAccounts.DECSYNC -> {
+                val parsedFeedSource = ParsedFeedSource(
+                    id = feedUrl.hashCode().toString(),
+                    url = feedUrl,
+                    title = feedTitle,
+                    category = category,
+                    logoUrl = logoUrl,
+                    websiteUrl = null,
+                )
+
+                if (category != null) {
+                    databaseHelper.insertCategories(listOf(category))
+                }
+
+                databaseHelper.insertFeedSource(listOf(parsedFeedSource))
+                decSyncItemsSyncActions.addSubscription(feedUrl, feedTitle, category?.title)
             }
         }
     }

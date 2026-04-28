@@ -63,3 +63,10 @@ sealed class FeedSyncError(override val code: String) : ErrorCode {
     data object DeleteCategoryFailed : FeedSyncError("FS9")
     data object SyncFeedsFailed : FeedSyncError("FS10")
 }
+
+// DecSync Errors (DS)
+sealed class DecSyncError(override val code: String) : ErrorCode {
+    data object SetupFailed : DecSyncError("DS1")
+    data object SyncFeedSourcesFailed : DecSyncError("DS2")
+    data object SyncFeedItemsFailed : DecSyncError("DS3")
+}

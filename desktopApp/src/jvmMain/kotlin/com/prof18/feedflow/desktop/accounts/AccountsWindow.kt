@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.prof18.feedflow.core.model.SyncAccounts
 import com.prof18.feedflow.desktop.accounts.bazqux.BazquxSyncScreen
+import com.prof18.feedflow.desktop.accounts.decsync.DecSyncSyncScreen
 import com.prof18.feedflow.desktop.accounts.dropbox.DropboxSyncScreen
 import com.prof18.feedflow.desktop.accounts.feedbin.FeedbinSyncScreen
 import com.prof18.feedflow.desktop.accounts.freshrss.FreshRssSyncScreen
@@ -80,6 +81,9 @@ internal fun AccountsWindow(
                         navigateToFeedbinSync = {
                             coroutineScope.launch { navigateToDetail(SyncAccounts.FEEDBIN) }
                         },
+                        navigateToDecSyncSync = {
+                            coroutineScope.launch { navigateToDetail(SyncAccounts.DECSYNC) }
+                        },
                     )
                 }
             },
@@ -117,6 +121,10 @@ internal fun AccountsWindow(
                             showNavigateBack = showNavigateBack,
                         )
                         SyncAccounts.FEEDBIN -> FeedbinSyncScreen(
+                            navigateBack = navigateBack,
+                            showNavigateBack = showNavigateBack,
+                        )
+                        SyncAccounts.DECSYNC -> DecSyncSyncScreen(
                             navigateBack = navigateBack,
                             showNavigateBack = showNavigateBack,
                         )

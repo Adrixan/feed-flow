@@ -9,4 +9,5 @@ enum class SyncAccounts {
     MINIFLUX,
     BAZQUX,
     FEEDBIN,
+    DECSYNC,
 }

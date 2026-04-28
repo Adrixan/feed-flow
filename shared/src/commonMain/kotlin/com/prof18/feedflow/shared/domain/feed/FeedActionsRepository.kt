@@ -8,6 +8,7 @@ import com.prof18.feedflow.core.model.SyncAccounts
 import com.prof18.feedflow.core.model.onErrorSuspend
 import com.prof18.feedflow.database.DatabaseHelper
 import com.prof18.feedflow.db.Search
+import com.prof18.feedflow.feedsync.decsync.DecSyncItemsSyncActions
 import com.prof18.feedflow.feedsync.feedbin.domain.FeedbinRepository
 import com.prof18.feedflow.feedsync.greader.domain.GReaderRepository
 import com.prof18.feedflow.shared.data.FeedAppearanceSettingsRepository
@@ -28,6 +29,7 @@ internal class FeedActionsRepository(
     private val feedAppearanceSettingsRepository: FeedAppearanceSettingsRepository,
     private val feedStateRepository: FeedStateRepository,
     private val feedItemParserWorker: FeedItemParserWorker,
+    private val decSyncItemsSyncActions: DecSyncItemsSyncActions,
 ) {
     suspend fun markAsRead(itemsToUpdates: HashSet<FeedItemId>) {
         feedStateRepository.markAsRead(itemsToUpdates)
@@ -53,6 +55,13 @@ internal class FeedActionsRepository(
             -> {
                 databaseHelper.markAsRead(itemsToUpdates.toList())
                 feedSyncRepository.setIsSyncUploadRequired()
+            }
+
+            SyncAccounts.DECSYNC -> {
+                databaseHelper.markAsRead(itemsToUpdates.toList())
+                itemsToUpdates.forEach { itemId ->
+                    decSyncItemsSyncActions.markItemRead(itemId.id, isRead = true)
+                }
             }
         }
     }
@@ -100,6 +109,13 @@ internal class FeedActionsRepository(
                     FeedOrder.OLDEST_FIRST -> databaseHelper.markAllOlderAsRead(targetItemId, currentFilter)
                 }
                 feedSyncRepository.setIsSyncUploadRequired()
+            }
+
+            SyncAccounts.DECSYNC -> {
+                when (feedOrder) {
+                    FeedOrder.NEWEST_FIRST -> databaseHelper.markAllNewerAsRead(targetItemId, currentFilter)
+                    FeedOrder.OLDEST_FIRST -> databaseHelper.markAllOlderAsRead(targetItemId, currentFilter)
+                }
             }
         }
         // Update the in-memory state without reloading everything
@@ -150,6 +166,13 @@ internal class FeedActionsRepository(
                 }
                 feedSyncRepository.setIsSyncUploadRequired()
             }
+
+            SyncAccounts.DECSYNC -> {
+                when (feedOrder) {
+                    FeedOrder.NEWEST_FIRST -> databaseHelper.markAllOlderAsRead(targetItemId, currentFilter)
+                    FeedOrder.OLDEST_FIRST -> databaseHelper.markAllNewerAsRead(targetItemId, currentFilter)
+                }
+            }
         }
         // Update the in-memory state without reloading everything
         feedStateRepository.markItemsBelowAsRead(targetItemId)
@@ -179,6 +202,10 @@ internal class FeedActionsRepository(
             -> {
                 databaseHelper.markAllFeedAsRead(currentFilter)
                 feedSyncRepository.setIsSyncUploadRequired()
+            }
+
+            SyncAccounts.DECSYNC -> {
+                databaseHelper.markAllFeedAsRead(currentFilter)
             }
         }
         feedStateRepository.getFeeds()
@@ -220,6 +247,11 @@ internal class FeedActionsRepository(
                 databaseHelper.updateBookmarkStatus(feedItemId, isBookmarked)
                 feedSyncRepository.setIsSyncUploadRequired()
             }
+
+            SyncAccounts.DECSYNC -> {
+                databaseHelper.updateBookmarkStatus(feedItemId, isBookmarked)
+                decSyncItemsSyncActions.markItemStarred(feedItemId.id, isBookmarked)
+            }
         }
 
         if (isBookmarked) {
@@ -255,6 +287,11 @@ internal class FeedActionsRepository(
             -> {
                 databaseHelper.updateReadStatus(feedItemId, isRead)
                 feedSyncRepository.setIsSyncUploadRequired()
+            }
+
+            SyncAccounts.DECSYNC -> {
+                databaseHelper.updateReadStatus(feedItemId, isRead)
+                decSyncItemsSyncActions.markItemRead(feedItemId.id, isRead)
             }
         }
     }

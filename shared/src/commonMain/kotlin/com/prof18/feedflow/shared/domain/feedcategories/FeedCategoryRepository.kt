@@ -93,6 +93,7 @@ internal class FeedCategoryRepository(
             SyncAccounts.DROPBOX,
             SyncAccounts.GOOGLE_DRIVE,
             SyncAccounts.ICLOUD,
+            SyncAccounts.DECSYNC,
             -> {
                 databaseHelper.deleteCategory(categoryId)
                 feedSyncRepository.deleteFeedSourceCategory(categoryId)
@@ -131,6 +132,7 @@ internal class FeedCategoryRepository(
             SyncAccounts.DROPBOX,
             SyncAccounts.GOOGLE_DRIVE,
             SyncAccounts.ICLOUD,
+            SyncAccounts.DECSYNC,
             -> {
                 databaseHelper.updateCategoryName(categoryId.value, newName.name)
                 val category = FeedSourceCategory(
@@ -179,6 +181,7 @@ internal class FeedCategoryRepository(
             SyncAccounts.DROPBOX,
             SyncAccounts.GOOGLE_DRIVE,
             SyncAccounts.ICLOUD,
+            SyncAccounts.DECSYNC,
             -> categoryName.name.hashCode().toString()
         }
 

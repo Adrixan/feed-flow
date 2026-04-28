@@ -12,6 +12,7 @@ import com.prof18.feedflow.core.utils.DispatcherProvider
 import com.prof18.feedflow.core.utils.FeedSyncMessageQueue
 import com.prof18.feedflow.database.DatabaseHelper
 import com.prof18.feedflow.feedsync.database.di.getFeedSyncModule
+import com.prof18.feedflow.feedsync.decsync.di.decSyncModule
 import com.prof18.feedflow.feedsync.dropbox.di.dropboxModule
 import com.prof18.feedflow.feedsync.feedbin.di.getFeedbinModule
 import com.prof18.feedflow.feedsync.googledrive.di.googleDriveModule
@@ -42,6 +43,7 @@ import com.prof18.feedflow.shared.presentation.AddFeedViewModel
 import com.prof18.feedflow.shared.presentation.BazquxSyncViewModel
 import com.prof18.feedflow.shared.presentation.BlockedWordsViewModel
 import com.prof18.feedflow.shared.presentation.ChangeFeedCategoryViewModel
+import com.prof18.feedflow.shared.presentation.DecSyncViewModel
 import com.prof18.feedflow.shared.presentation.DeeplinkFeedViewModel
 import com.prof18.feedflow.shared.presentation.EditFeedViewModel
 import com.prof18.feedflow.shared.presentation.ExtrasSettingsViewModel
@@ -103,6 +105,7 @@ internal fun getAllModulesModules(
         googleDriveModule(appConfig.appEnvironment) +
         getGReaderModule(appConfig.appEnvironment) +
         getFeedbinModule(appConfig.appEnvironment) +
+        decSyncModule +
         getLoggingModule(appConfig, crashReportingLogWriter) +
         getPlatformModule(appConfig.appEnvironment) +
         getFeedSyncModule(appConfig.appEnvironment)
@@ -179,6 +182,7 @@ private fun getCoreModule(appConfig: AppConfig) = module {
             feedAppearanceSettingsRepository = get(),
             feedStateRepository = get(),
             feedItemParserWorker = get(),
+            decSyncItemsSyncActions = get(),
         )
     }
 
@@ -432,6 +436,7 @@ private fun getCoreModule(appConfig: AppConfig) = module {
             gReaderRepository = get(),
             networkSettings = get(),
             feedbinRepository = get(),
+            decSyncSettings = get(),
         )
     }
 
@@ -482,6 +487,14 @@ private fun getCoreModule(appConfig: AppConfig) = module {
     }
 
     viewModel {
+        DecSyncViewModel(
+            decSyncActions = get(),
+            accountsRepository = get(),
+            feedStateRepository = get(),
+        )
+    }
+
+    viewModel {
         BazquxSyncViewModel(
             gReaderRepository = get(),
             accountsRepository = get(),
@@ -509,6 +522,7 @@ private fun getCoreModule(appConfig: AppConfig) = module {
             feedbinRepository = get(),
             databaseHelper = get(),
             opmlFeedHandler = get(),
+            decSyncItemsSyncActions = get(),
         )
     }
 
@@ -527,6 +541,7 @@ private fun getCoreModule(appConfig: AppConfig) = module {
             rssParserWrapper = get(),
             dateFormatter = get(),
             rssChannelMapper = get(),
+            decSyncItemsSyncActions = get(),
         )
     }
 

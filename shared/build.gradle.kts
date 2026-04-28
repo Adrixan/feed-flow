@@ -79,6 +79,7 @@ kotlin {
                 implementation(project(":feedSync:greader"))
                 implementation(project(":feedSync:networkcore"))
                 implementation(project(":feedSync:feedbin"))
+                implementation(project(":feedSync:decsync"))
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
                 implementation(libs.koin.core.vm)

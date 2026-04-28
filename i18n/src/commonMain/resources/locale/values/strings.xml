@@ -220,6 +220,12 @@
     <string name="feedbin_last_sync">Last sync: %s</string>
     <string name="feedbin_username_hint">Your Feedbin email address</string>
     <string name="feedbin_password_hint">Your Feedbin password</string>
+    <string name="decsync_description">DecSync is a file-based sync solution. Point FeedFlow to a shared directory (e.g. via Syncthing or Nextcloud) to sync feed subscriptions and read/bookmarked states across apps.</string>
+    <string name="decsync_directory_hint">No directory selected</string>
+    <string name="decsync_choose_directory">Choose Sync Directory</string>
+    <string name="decsync_connect">Connect</string>
+    <string name="decsync_account_connected">DecSync is successfully connected</string>
+    <string name="decsync_not_available_on_desktop">DecSync is not available on this platform</string>
     <string name="link_opening_preference">Link opening behaviour</string>
     <string name="link_opening_preference_default">Default</string>
     <string name="link_opening_preference_reader_mode">Reader mode</string>

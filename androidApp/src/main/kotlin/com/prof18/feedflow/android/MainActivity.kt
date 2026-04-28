@@ -38,6 +38,7 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.navigationevent.NavigationEvent
 import com.prof18.feedflow.android.accounts.AccountsScreen
 import com.prof18.feedflow.android.accounts.bazqux.BazquxSyncScreen
+import com.prof18.feedflow.android.accounts.decsync.DecSyncSyncScreen
 import com.prof18.feedflow.android.accounts.feedbin.FeedbinSyncScreen
 import com.prof18.feedflow.android.accounts.freshrss.FreshRssSyncScreen
 import com.prof18.feedflow.android.accounts.miniflux.MinifluxSyncScreen
@@ -446,6 +447,7 @@ class MainActivity : BaseThemeActivity() {
                         navigateToMinifluxSync = { backStack.add(MinifluxSync) },
                         navigateToBazquxSync = { backStack.add(BazquxSync) },
                         navigateToFeedbinSync = { backStack.add(FeedbinSync) },
+                        navigateToDecSyncSync = { backStack.add(DecSyncSync) },
                     )
                 }
 
@@ -483,6 +485,12 @@ class MainActivity : BaseThemeActivity() {
 
                 entry<FeedbinSync> {
                     FeedbinSyncScreen(
+                        navigateBack = navigateBack,
+                    )
+                }
+
+                entry<DecSyncSync> {
+                    DecSyncSyncScreen(
                         navigateBack = navigateBack,
                     )
                 }
