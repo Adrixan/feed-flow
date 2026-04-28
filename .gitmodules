@@ -1,0 +1,15 @@
+[submodule ".github/copilot-instructions"]
+	path = .github/copilot-instructions
+	url = https://github.com/Adrixan/copilot-instructions.git
+[submodule ".kilocode/glm5-instructions"]
+	path = .kilocode/glm5-instructions
+	url = https://github.com/Adrixan/kilo-glm5-instructions.git
+[submodule ".impeccable"]
+	path = .impeccable
+	url = https://github.com/pbakaus/impeccable.git
+[submodule ".minimax"]
+	path = .minimax
+	url = https://github.com/MiniMax-AI/skills.git
+[submodule ".agency"]
+	path = .agency
+	url = https://github.com/msitarzewski/agency-agents.git
