@@ -451,6 +451,7 @@ if (!isMacOS) {
 
                     %files
                     %defattr(-,root,root,-)
+                    %attr(755,root,root) /opt/feedflow/bin/FeedFlow
                     /opt/feedflow
                     """.trimIndent(),
                 )
